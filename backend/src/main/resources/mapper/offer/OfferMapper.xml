@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softwarego.selection.offer.mapper.OfferMapper">
+
+    <resultMap id="OfferResultMap" type="com.softwarego.selection.offer.domain.Offer">
+        <id column="id" property="id"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="application_target_id" property="applicationTargetId"/>
+        <result column="round_no" property="roundNo"/>
+        <result column="status" property="status"/>
+        <result column="confirm_deadline" property="confirmDeadline"/>
+        <result column="granted_at" property="grantedAt"/>
+        <result column="confirmed_at" property="confirmedAt"/>
+        <result column="abandoned_at" property="abandonedAt"/>
+        <result column="abandon_reason" property="abandonReason"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <resultMap id="OfferItemResultMap" type="com.softwarego.selection.offer.dto.OfferItemResponse">
+        <id column="id" property="offerId"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="teacher_name" property="teacherName"/>
+        <result column="lab_name" property="labName"/>
+        <result column="round_no" property="roundNo"/>
+        <result column="status" property="status"/>
+        <result column="confirm_deadline" property="confirmDeadline"/>
+        <result column="granted_at" property="grantedAt"/>
+        <result column="confirmed_at" property="confirmedAt"/>
+        <result column="abandoned_at" property="abandonedAt"/>
+        <result column="abandon_reason" property="abandonReason"/>
+    </resultMap>
+
+    <sql id="offerColumns">
+        id, teacher_id, student_id, application_target_id, round_no, status,
+        confirm_deadline, granted_at, confirmed_at, abandoned_at, abandon_reason,
+        created_at, updated_at
+    </sql>
+
+    <select id="findById" resultMap="OfferResultMap">
+        SELECT <include refid="offerColumns"/>
+        FROM offer
+        WHERE id = #{id}
+    </select>
+
+    <select id="findPendingByStudentForUpdate" resultMap="OfferResultMap">
+        SELECT <include refid="offerColumns"/>
+        FROM offer
+        WHERE student_id = #{studentId}
+          AND status = 'PENDING'
+        ORDER BY id ASC
+        FOR UPDATE
+    </select>
+
+    <select id="findByStudentId" resultMap="OfferItemResultMap">
+        SELECT o.id,
+               o.teacher_id,
+               l.teacher_name,
+               l.lab_name,
+               o.round_no,
+               o.status,
+               o.confirm_deadline,
+               o.granted_at,
+               o.confirmed_at,
+               o.abandoned_at,
+               o.abandon_reason
+        FROM offer o
+        LEFT JOIN lab_info l ON l.teacher_id = o.teacher_id
+        WHERE o.student_id = #{studentId}
+        ORDER BY o.round_no DESC, o.granted_at DESC
+    </select>
+
+    <update id="markConfirmed">
+        UPDATE offer
+        SET status = 'CONFIRMED',
+            confirmed_at = #{confirmedAt}
+        WHERE id = #{id}
+          AND status = 'PENDING'
+    </update>
+
+    <update id="markAbandoned">
+        UPDATE offer
+        SET status = 'ABANDONED',
+            abandoned_at = #{abandonedAt},
+            abandon_reason = #{reason}
+        WHERE id = #{id}
+          AND status = 'PENDING'
+    </update>
+
+    <update id="expirePendingForStudent">
+        UPDATE offer
+        SET status = 'ABANDONED',
+            abandoned_at = #{now},
+            abandon_reason = 'TIMEOUT'
+        WHERE student_id = #{studentId}
+          AND status = 'PENDING'
+          AND confirm_deadline &lt;= #{now}
+    </update>
+
+    <update id="expireAllPending">
+        UPDATE offer
+        SET status = 'ABANDONED',
+            abandoned_at = #{now},
+            abandon_reason = 'TIMEOUT'
+        WHERE status = 'PENDING'
+          AND confirm_deadline &lt;= #{now}
+    </update>
+
+    <update id="expirePendingForTeacherAndRound">
+        UPDATE offer
+        SET status = 'ABANDONED',
+            abandoned_at = #{now},
+            abandon_reason = 'TIMEOUT'
+        WHERE teacher_id = #{teacherId}
+          AND round_no = #{roundNo}
+          AND status = 'PENDING'
+          AND confirm_deadline &lt;= #{now}
+    </update>
+
+    <select id="countBlockingOffers" resultType="long">
+        SELECT COUNT(*)
+        FROM offer
+        WHERE student_id = #{studentId}
+          AND status IN ('PENDING', 'CONFIRMED')
+    </select>
+</mapper>

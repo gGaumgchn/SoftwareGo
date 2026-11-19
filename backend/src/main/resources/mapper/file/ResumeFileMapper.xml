@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softwarego.selection.file.mapper.ResumeFileMapper">
+
+    <resultMap id="ResumeFileResultMap" type="com.softwarego.selection.file.domain.ResumeFile">
+        <id column="id" property="id"/>
+        <result column="owner_id" property="ownerId"/>
+        <result column="purpose" property="purpose"/>
+        <result column="original_name" property="originalName"/>
+        <result column="storage_path" property="storagePath"/>
+        <result column="content_type" property="contentType"/>
+        <result column="file_size" property="fileSize"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.softwarego.selection.file.domain.ResumeFile"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO resume_file (owner_id, purpose, original_name, storage_path, content_type, file_size)
+        VALUES (#{ownerId}, #{purpose}, #{originalName}, #{storagePath}, #{contentType}, #{fileSize})
+    </insert>
+
+    <select id="findById" resultMap="ResumeFileResultMap">
+        SELECT id, owner_id, purpose, original_name, storage_path, content_type, file_size,
+               created_at, updated_at
+        FROM resume_file
+        WHERE id = #{id}
+    </select>
+
+    <select id="countTeacherApplicationTargets" resultType="long">
+        SELECT COUNT(*)
+        FROM application_target t
+        JOIN volunteer_application va ON va.id = t.application_id
+        WHERE t.teacher_id = #{teacherId}
+          AND va.student_id = #{studentId}
+    </select>
+</mapper>

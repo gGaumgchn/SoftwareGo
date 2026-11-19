@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softwarego.selection.volunteer.mapper.VolunteerApplicationMapper">
+
+    <resultMap id="VolunteerApplicationResultMap"
+               type="com.softwarego.selection.volunteer.domain.VolunteerApplication">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="round_no" property="roundNo"/>
+        <result column="resume_file_id" property="resumeFileId"/>
+        <result column="intra_lab_adjust" property="intraLabAdjust"/>
+        <result column="college_adjust" property="collegeAdjust"/>
+        <result column="submitted_at" property="submittedAt"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="applicationColumns">
+        id, student_id, round_no, resume_file_id, intra_lab_adjust,
+        college_adjust, submitted_at, created_at, updated_at
+    </sql>
+
+    <select id="findByStudentAndRound" resultMap="VolunteerApplicationResultMap">
+        SELECT <include refid="applicationColumns"/>
+        FROM volunteer_application
+        WHERE student_id = #{studentId}
+          AND round_no = #{roundNo}
+        LIMIT 1
+    </select>
+
+    <select id="findByStudentAndRoundForUpdate" resultMap="VolunteerApplicationResultMap">
+        SELECT <include refid="applicationColumns"/>
+        FROM volunteer_application
+        WHERE student_id = #{studentId}
+          AND round_no = #{roundNo}
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
+    <select id="findByStudent" resultMap="VolunteerApplicationResultMap">
+        SELECT <include refid="applicationColumns"/>
+        FROM volunteer_application
+        WHERE student_id = #{studentId}
+        <if test="roundNo != null">
+            AND round_no = #{roundNo}
+        </if>
+        ORDER BY round_no DESC
+    </select>
+
+    <insert id="insert" parameterType="com.softwarego.selection.volunteer.domain.VolunteerApplication"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO volunteer_application (
+            student_id, round_no, resume_file_id, intra_lab_adjust, college_adjust, submitted_at
+        ) VALUES (
+            #{studentId}, #{roundNo}, #{resumeFileId}, #{intraLabAdjust}, #{collegeAdjust}, #{submittedAt}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.softwarego.selection.volunteer.domain.VolunteerApplication">
+        UPDATE volunteer_application
+        SET resume_file_id = #{resumeFileId},
+            intra_lab_adjust = #{intraLabAdjust},
+            college_adjust = #{collegeAdjust},
+            submitted_at = #{submittedAt}
+        WHERE id = #{id}
+    </update>
+
+    <select id="countFinalAdmissions" resultType="long">
+        SELECT COUNT(*)
+        FROM final_admission
+        WHERE student_id = #{studentId}
+    </select>
+</mapper>

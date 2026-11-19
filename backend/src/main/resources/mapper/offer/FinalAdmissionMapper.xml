@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softwarego.selection.offer.mapper.FinalAdmissionMapper">
+
+    <resultMap id="FinalAdmissionResultMap"
+               type="com.softwarego.selection.offer.domain.FinalAdmission">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="round_no" property="roundNo"/>
+        <result column="admission_type" property="admissionType"/>
+        <result column="source_offer_id" property="sourceOfferId"/>
+        <result column="admitted_at" property="admittedAt"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <select id="findByStudentId" resultMap="FinalAdmissionResultMap">
+        SELECT id, student_id, teacher_id, round_no, admission_type, source_offer_id,
+               admitted_at, created_at, updated_at
+        FROM final_admission
+        WHERE student_id = #{studentId}
+    </select>
+
+    <insert id="insert" parameterType="com.softwarego.selection.offer.domain.FinalAdmission"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO final_admission (
+            student_id, teacher_id, round_no, admission_type, source_offer_id, admitted_at
+        ) VALUES (
+            #{studentId}, #{teacherId}, #{roundNo}, #{admissionType}, #{sourceOfferId}, #{admittedAt}
+        )
+    </insert>
+</mapper>

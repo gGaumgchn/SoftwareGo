@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>公告 - 实训室选拔系统</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff7a18'/%3E%3Cpath d='M16 5 27 25 H5 Z' fill='none' stroke='%23ffffff' stroke-width='2.2'/%3E%3Ccircle cx='16' cy='17' r='3.2' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700&family=Rajdhani:wght@500;600;700&display=swap">
+<style>
+:root{--bg:#f5f6fa;--bg2:#ffffff;--panel:#ffffff;--panel2:#f6f7fb;--line:rgba(255,154,69,.13);--line2:rgba(255,154,69,.3);--cyan:#ff7a18;--blue:#ff9a45;--text:#1f2937;--text2:#64748b;--text3:#94a3b8;--green:#34d399;--amber:#fbbf24;--red:#f87171;--font:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;--tech:'Rajdhani','Noto Sans SC',sans-serif;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);font-size:14px;line-height:1.65;color:var(--text);background:var(--bg);background-image:radial-gradient(1100px 520px at 85% -8%,rgba(255,122,24,.08),transparent 62%),radial-gradient(900px 520px at 6% 108%,rgba(255,154,69,.06),transparent 60%),linear-gradient(180deg,var(--bg2),var(--bg));background-attachment:fixed}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#d6dbe6;border-radius:9px}::-webkit-scrollbar-track{background:transparent}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}input,select,textarea{font-family:inherit;color:var(--text)}
+.app{display:flex;min-height:100vh}
+.sidebar{width:238px;flex:0 0 238px;background:rgba(255,255,255,.94);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;backdrop-filter:blur(6px)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh}
+.topbar{height:64px;flex:0 0 64px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:rgba(255,255,255,.82);backdrop-filter:blur(6px)}
+.content{flex:1;overflow:auto;padding:24px 30px 44px}
+.brand{display:flex;align-items:center;gap:11px;padding:19px 18px;border-bottom:1px solid var(--line)}
+.brand-mark{width:38px;height:38px;flex:0 0 38px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(255,122,24,.22),rgba(255,154,69,.07));border:1px solid var(--line2);color:var(--cyan)}
+.brand-name{font-weight:700;font-size:15px;letter-spacing:.4px}
+.brand-sub{font-family:var(--tech);font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-top:2px}
+.menu{padding:12px 12px;flex:1;overflow:auto}
+.menu-cap{font-size:11px;color:var(--text3);letter-spacing:1px;padding:12px 13px 6px}
+.menu-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:9px;color:var(--text2);margin-bottom:4px;font-size:14px;transition:.15s;border:1px solid transparent}
+.menu-item svg{width:18px;height:18px;flex:0 0 18px}
+.menu-item:hover{color:var(--text);background:rgba(255,154,69,.06)}
+.menu-item.active{color:var(--cyan);background:rgba(255,122,24,.1);border-color:rgba(255,122,24,.22)}
+.sidebar-foot{padding:14px 18px;border-top:1px solid var(--line);font-size:11px;color:var(--text3);line-height:1.8}
+.sidebar-foot a:hover{color:var(--cyan)}
+.topbar-title{font-size:16px;font-weight:600;letter-spacing:.5px}
+.user{display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#ffffff;font-weight:700;display:grid;place-items:center;font-size:14px}
+.uname{font-size:13px;font-weight:600;line-height:1.2}.urole{font-size:11px;color:var(--text3);line-height:1.2}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(255,255,255,.94));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;max-width:1080px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+.card-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:9px}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.notice{display:flex;gap:14px;padding:16px 6px;border-bottom:1px solid rgba(255,154,69,.07);cursor:pointer;align-items:flex-start}
+.notice:last-child{border-bottom:0}
+.notice:hover .n-t{color:var(--cyan)}
+.n-ico{width:36px;height:36px;flex:0 0 36px;border-radius:9px;background:rgba(255,154,69,.09);color:var(--blue);display:grid;place-items:center;margin-top:1px}
+.n-ico svg{width:17px;height:17px}
+.n-t{font-size:14.5px;color:var(--text);font-weight:500}
+.n-s{font-size:13px;color:var(--text2);margin-top:3px}
+.n-time{font-size:11.5px;color:var(--text3);margin-top:4px;font-family:var(--tech)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 9px;border-radius:20px;border:1px solid;white-space:nowrap}
+.badge-gray{color:var(--text2);border-color:var(--line);background:rgba(148,163,184,.06)}
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:98}
+.mask.show{display:flex}
+.modal{width:560px;max-width:92vw;max-height:86vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:28px;box-shadow:0 20px 60px rgba(15,23,42,.18)}
+.modal h3{font-size:17px;font-weight:600;margin-bottom:8px}
+.modal .m-sub{font-size:12.5px;color:var(--text3);margin-bottom:18px;font-family:var(--tech)}
+.modal .m-body{font-size:13.5px;color:var(--text2);line-height:1.9;white-space:pre-wrap}
+.m-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);padding:9px 20px;border-radius:8px;font-size:13.5px;transition:.15s;font-weight:500}
+.btn:hover{border-color:rgba(255,154,69,.5);background:#fff1e3}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 21 19 H3 Z"/><circle cx="12" cy="14.5" r="2.4"/></svg></div>
+      <div><div class="brand-name">实训室选拔系统</div><div class="brand-sub">Lab Selection</div></div>
+    </div>
+    <nav class="menu" id="menu"></nav>
+    <div class="sidebar-foot">演示原型 · 数据为示例<br><a href="登录.html">退出并重新登录</a></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title">公告</div>
+      <div class="user"><div class="avatar" id="avatar">—</div><div><div class="uname" id="uname">—</div><div class="urole" id="urole">—</div></div></div>
+    </header>
+
+    <div class="content">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>公告列表</div>
+          <span class="badge badge-gray">只读 · 发布后不可修改或删除</span>
+        </div>
+        <div id="list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="modal">
+    <h3 id="mTitle">—</h3>
+    <div class="m-sub" id="mTime">—</div>
+    <div class="m-body" id="mBody">—</div>
+    <div class="m-actions"><button class="btn" id="mClose" type="button">关闭</button></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var role = (new URLSearchParams(location.search).get('role')) || localStorage.getItem('sel_role') || 'student';
+
+  var USERS = {
+    student:{name:'张伟', role:'学生', sno:'2026001001'},
+    teacher:{name:'李娜', role:'导师', sno:'2026012001'},
+    manager:{name:'刘栋', role:'负责人', sno:'2026023001'}
+  };
+
+  var ICONS = {
+    home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>',
+    bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+    building:'<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/>',
+    edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    check:'<circle cx="12" cy="12" r="9"/><path d="M8.5 12.2 11 14.7 15.5 9.5"/>',
+    todo:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4a3 3 0 0 1 6 0"/><path d="M9 10h6M9 14h6"/>',
+    users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'
+  };
+
+  var MENUS = {
+    student:[
+      {t:'主页面', href:'主页面.html', icon:'home'},
+      {t:'公告', href:'公告.html', icon:'bell', active:true},
+      {t:'查看实训室信息', href:'查看实训室信息.html', icon:'building'},
+      {t:'志愿填报', href:'志愿填报.html', icon:'edit'},
+      {t:'拟录取确认', href:'拟录取确认.html', icon:'check'},
+      {t:'个人待办', href:'个人待办.html', icon:'todo'}
+    ],
+    teacher:[
+      {t:'主页面', href:'主页面.html', icon:'home'},
+      {t:'公告', href:'公告.html', icon:'bell', active:true},
+      {t:'实训室信息', href:'提交实训室信息.html', icon:'building'},
+      {t:'申请与录取管理', href:'发放拟录取.html', icon:'users'},
+      {t:'个人待办', href:'个人待办.html', icon:'todo'}
+    ],
+    manager:[
+      {t:'主页面', href:'主页面.html', icon:'home'},
+      {t:'公告', href:'公告.html', icon:'bell', active:true},
+      {t:'阶段管理', href:'阶段管理.html', icon:'calendar'},
+      {t:'个人待办', href:'个人待办.html', icon:'todo'}
+    ]
+  };
+
+  var NOTICES = [
+    {t:'关于第一轮志愿填报开放的通知', time:'2026-11-22 09:00', s:'第一轮志愿填报现已开放，请在截止时间前完成填报并上传个人简历。', body:'第一轮志愿填报现已开放，截止时间为 2026-11-27 17:00。\n\n请同学们在截止前登录系统，填写一至三名意向导师、上传 PDF 简历，并分别选择是否同意实训室内调剂与学院内调剂。逾期未提交视为放弃本轮填报。'},
+    {t:'实训室开放日安排', time:'2026-11-18 10:00', s:'实训室开放日将于本周进行，请同学们按安排前往各实训室参观交流。', body:'实训室开放日定于 2026-11-19 至 11-20 举行。\n\n请同学们按安排前往各实训室参观交流，了解研究方向与招生计划，为后续志愿填报做好准备。'},
+    {t:'选拔整体流程说明', time:'2026-11-16 09:00', s:'本年度选拔采用三轮录取 + 统筹调剂方式，各阶段时间以系统配置为准。', body:'本年度选拔流程为：集中宣讲 → 实训室开放日 → 三轮录取 → 统筹调剂 → 正式入组。\n\n每轮录取包含志愿填报、线下面试、拟录取确认三个环节。三轮结束后仍未录取的学生进入统筹调剂，依据最后一次提交的调剂意愿安排。'},
+    {t:'关于提交实训室信息的通知', time:'2026-11-14 15:00', s:'请各位导师及时提交实训室名称、位置、招生人数及个人简历。', body:'请各位导师于 2026-11-22 17:00 前登录系统，提交实训室名称、位置、计划招收人数、研究方向、联系方式及个人 PDF 简历，供学生在志愿填报前查看。'},
+    {t:'选拔系统上线试运行', time:'2026-11-10 09:00', s:'实训室选拔系统上线，登录无需注册与密码。', body:'实训室选拔系统上线试运行。\n\n登录无需注册与密码：选择身份（学生 / 导师 / 负责人），输入 10 位学工号，完成模拟人脸比对即可进入系统。人脸比对为模拟操作，不采集、上传或存储人脸数据。'}
+  ];
+
+  function renderSidebar() {
+    var u = USERS[role];
+    document.getElementById('avatar').textContent = u.name.charAt(0);
+    document.getElementById('uname').textContent = u.name + ' · ' + u.sno;
+    document.getElementById('urole').textContent = u.role;
+    document.getElementById('menu').innerHTML = '<div class="menu-cap">功能菜单 · ' + u.role + '</div>' +
+      MENUS[role].map(function (m) {
+        return '<a class="menu-item' + (m.active ? ' active' : '') + '" href="' + m.href + '?role=' + role + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ICONS[m.icon] + '</svg><span>' + m.t + '</span></a>';
+      }).join('');
+  }
+
+  function renderList() {
+    document.getElementById('list').innerHTML = NOTICES.map(function (n, i) {
+      return '<div class="notice" data-i="' + i + '"><div class="n-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ICONS.bell + '</svg></div><div style="flex:1;min-width:0"><div class="n-t">' + n.t + '</div><div class="n-s">' + n.s + '</div><div class="n-time">' + n.time + '</div></div></div>';
+    }).join('');
+
+    document.querySelectorAll('.notice').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var n = NOTICES[+el.dataset.i];
+        document.getElementById('mTitle').textContent = n.t;
+        document.getElementById('mTime').textContent = '发布时间：' + n.time;
+        document.getElementById('mBody').textContent = n.body;
+        document.getElementById('mask').classList.add('show');
+      });
+    });
+  }
+
+  document.getElementById('mClose').addEventListener('click', function () {
+    document.getElementById('mask').classList.remove('show');
+  });
+  document.getElementById('mask').addEventListener('click', function (e) {
+    if (e.target === this) this.classList.remove('show');
+  });
+
+  renderSidebar();
+  renderList();
+})();
+</script>
+</body>
+</html>

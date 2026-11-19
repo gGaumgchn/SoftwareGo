@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>阶段管理 - 实训室选拔系统</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff7a18'/%3E%3Cpath d='M16 5 27 25 H5 Z' fill='none' stroke='%23ffffff' stroke-width='2.2'/%3E%3Ccircle cx='16' cy='17' r='3.2' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700&family=Rajdhani:wght@500;600;700&display=swap">
+<style>
+:root{--bg:#f5f6fa;--bg2:#ffffff;--panel:#ffffff;--panel2:#f6f7fb;--line:rgba(255,154,69,.13);--line2:rgba(255,154,69,.3);--cyan:#ff7a18;--blue:#ff9a45;--text:#1f2937;--text2:#64748b;--text3:#94a3b8;--green:#34d399;--amber:#fbbf24;--red:#f87171;--font:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;--tech:'Rajdhani','Noto Sans SC',sans-serif;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);font-size:14px;line-height:1.65;color:var(--text);background:var(--bg);background-image:radial-gradient(1100px 520px at 85% -8%,rgba(255,122,24,.08),transparent 62%),radial-gradient(900px 520px at 6% 108%,rgba(255,154,69,.06),transparent 60%),linear-gradient(180deg,var(--bg2),var(--bg));background-attachment:fixed}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#d6dbe6;border-radius:9px}::-webkit-scrollbar-track{background:transparent}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}input,select,textarea{font-family:inherit;color:var(--text)}
+.app{display:flex;min-height:100vh}
+.sidebar{width:238px;flex:0 0 238px;background:rgba(255,255,255,.94);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;backdrop-filter:blur(6px)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh}
+.topbar{height:64px;flex:0 0 64px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:rgba(255,255,255,.82);backdrop-filter:blur(6px)}
+.content{flex:1;overflow:auto;padding:24px 30px 44px}
+.brand{display:flex;align-items:center;gap:11px;padding:19px 18px;border-bottom:1px solid var(--line)}
+.brand-mark{width:38px;height:38px;flex:0 0 38px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(255,122,24,.22),rgba(255,154,69,.07));border:1px solid var(--line2);color:var(--cyan)}
+.brand-name{font-weight:700;font-size:15px;letter-spacing:.4px}
+.brand-sub{font-family:var(--tech);font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-top:2px}
+.menu{padding:12px 12px;flex:1;overflow:auto}
+.menu-cap{font-size:11px;color:var(--text3);letter-spacing:1px;padding:12px 13px 6px}
+.menu-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:9px;color:var(--text2);margin-bottom:4px;font-size:14px;transition:.15s;border:1px solid transparent}
+.menu-item svg{width:18px;height:18px;flex:0 0 18px}
+.menu-item:hover{color:var(--text);background:rgba(255,154,69,.06)}
+.menu-item.active{color:var(--cyan);background:rgba(255,122,24,.1);border-color:rgba(255,122,24,.22)}
+.sidebar-foot{padding:14px 18px;border-top:1px solid var(--line);font-size:11px;color:var(--text3);line-height:1.8}
+.sidebar-foot a:hover{color:var(--cyan)}
+.topbar-title{font-size:16px;font-weight:600;letter-spacing:.5px}
+.user{display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#ffffff;font-weight:700;display:grid;place-items:center;font-size:14px}
+.uname{font-size:13px;font-weight:600;line-height:1.2}.urole{font-size:11px;color:var(--text3);line-height:1.2}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(255,255,255,.94));border:1px solid var(--line);border-radius:var(--r);padding:24px 26px;max-width:1120px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+.card-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:9px}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.group-label{font-size:12px;color:var(--amber);letter-spacing:.5px;margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.group-label::before{content:'';width:10px;height:2px;background:var(--amber)}
+.stage-row{display:grid;grid-template-columns:180px 1fr 1fr;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,154,69,.06)}
+.stage-row.conflict{background:rgba(248,113,113,.05);border-radius:8px;padding:10px 8px}
+.stage-name{font-size:14px;color:var(--text);font-weight:500}
+.stage-name small{display:block;font-size:11px;color:var(--text3);font-weight:400}
+.input{width:100%;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13.5px;outline:none;transition:.15s;color:var(--text);color-scheme:light}
+.input:focus{border-color:var(--line2);box-shadow:0 0 0 3px rgba(255,122,24,.12)}
+.input.err{border-color:rgba(248,113,113,.55)}
+.label{display:block;font-size:13px;color:var(--text2);margin-bottom:7px}
+.switch-row{display:flex;align-items:center;gap:12px;margin:24px 0 6px;padding-top:20px;border-top:1px solid var(--line)}
+.switch{display:inline-flex;align-items:center;gap:10px;font-size:14px;color:var(--text2);cursor:pointer}
+.switch .track{width:40px;height:22px;border-radius:20px;background:#e7eaf1;border:1px solid var(--line);position:relative;transition:.15s}
+.switch .track::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#94a3b8;transition:.15s}
+.switch.on .track{background:rgba(255,122,24,.25);border-color:var(--line2)}
+.switch.on .track::after{left:20px;background:var(--cyan)}
+.switch.on{color:var(--text)}
+.notice-editor{margin-top:16px;padding:18px;border:1px solid var(--line);border-radius:11px;background:rgba(250,250,252,.92);display:none}
+.notice-editor.show{display:block}
+.field{margin-bottom:16px}
+.textarea{width:100%;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13.5px;outline:none;transition:.15s;color:var(--text);resize:vertical;min-height:120px;line-height:1.8}
+.textarea:focus{border-color:var(--line2);box-shadow:0 0 0 3px rgba(255,122,24,.12)}
+.textarea.err{border-color:rgba(248,113,113,.55)}
+.error{font-size:12px;color:var(--red);margin-top:6px}
+.actions{display:flex;align-items:center;gap:14px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);padding:10px 24px;border-radius:8px;font-size:14px;transition:.15s;font-weight:500}
+.btn:hover:not(:disabled){border-color:rgba(255,154,69,.5);background:#fff1e3}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(180deg,rgba(255,122,24,.92),rgba(255,154,69,.78));border-color:rgba(255,122,24,.5);color:#ffffff;font-weight:600}
+.btn-primary:hover:not(:disabled){filter:brightness(1.07)}
+.help{font-size:12px;color:var(--text3);margin-top:6px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 9px;border-radius:20px;border:1px solid;white-space:nowrap}
+.badge-cyan{color:var(--cyan);border-color:rgba(255,122,24,.35);background:rgba(255,122,24,.08)}
+.toast{position:fixed;top:22px;left:50%;transform:translateX(-50%) translateY(-130%);background:#ffffff;border:1px solid var(--line2);color:var(--text);padding:11px 20px;border-radius:9px;font-size:13.5px;box-shadow:0 10px 30px rgba(15,23,42,.16);transition:.28s;z-index:99}
+.toast.show{transform:translateX(-50%) translateY(0)}.toast.ok{border-color:rgba(52,211,153,.45)}.toast.err{border-color:rgba(248,113,113,.45)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 21 19 H3 Z"/><circle cx="12" cy="14.5" r="2.4"/></svg></div>
+      <div><div class="brand-name">实训室选拔系统</div><div class="brand-sub">Lab Selection</div></div>
+    </div>
+    <nav class="menu">
+      <div class="menu-cap">功能菜单 · 负责人</div>
+      <a class="menu-item" href="主页面.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>主页面</span></a>
+      <a class="menu-item" href="公告.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span>公告</span></a>
+      <a class="menu-item active" href="阶段管理.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>阶段管理</span></a>
+      <a class="menu-item" href="个人待办.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4a3 3 0 0 1 6 0"/><path d="M9 10h6M9 14h6"/></svg><span>个人待办</span></a>
+    </nav>
+    <div class="sidebar-foot">演示原型 · 数据为示例<br><a href="登录.html">退出并重新登录</a></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title">阶段管理</div>
+      <div class="user"><div class="avatar">刘</div><div><div class="uname">刘栋 · 2026023001</div><div class="urole">负责人</div></div></div>
+    </header>
+
+    <div class="content">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>配置选拔阶段时间</div>
+          <span class="badge badge-cyan">保存后立即生效</span>
+        </div>
+
+        <div id="stageList"></div>
+
+        <div class="switch-row">
+          <label class="switch" id="pubSwitch"><span class="track"></span><span>本次调整发布公告</span></label>
+          <span class="help" style="margin:0">不发布仅更新阶段时间；发布后公告面向全体用户，本次最多生成一条。</span>
+        </div>
+
+        <div class="notice-editor" id="noticeEditor">
+          <div class="field">
+            <label class="label">公告标题</label>
+            <input class="input" id="noticeTitle" type="text" value="关于调整选拔阶段时间的通知">
+          </div>
+          <div class="field">
+            <label class="label">公告正文（可编辑）</label>
+            <textarea class="textarea" id="noticeBody"></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="saveBtn" type="button">保存</button>
+          <span class="help" style="margin:0" id="saveHint">阶段名称与顺序固定，仅配置起止时间；每轮录取内「志愿填报 → 面试 → 拟录取确认」共用该轮时间。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var STAGES = [
+    {name:'集中宣讲', sub:'宣讲会（线下）', start:'2026-11-18T14:00', end:'2026-11-18T17:00'},
+    {name:'实训室开放日', sub:'开放参观（线下）', start:'2026-11-19T09:00', end:'2026-11-20T17:00'},
+    {name:'第一轮录取', sub:'志愿填报 → 面试 → 拟录取确认', start:'2026-11-23T09:00', end:'2026-11-27T17:00', group:true},
+    {name:'第二轮录取', sub:'志愿填报 → 面试 → 拟录取确认', start:'2026-12-01T09:00', end:'2026-12-05T17:00'},
+    {name:'第三轮录取', sub:'志愿填报 → 面试 → 拟录取确认', start:'2026-12-08T09:00', end:'2026-12-12T17:00'},
+    {name:'调剂', sub:'统筹调剂', start:'2026-12-15T09:00', end:'2026-12-16T17:00'},
+    {name:'正式入组', sub:'确定最终去向', start:'2026-12-20T09:00', end:'2026-12-20T17:00'}
+  ];
+
+  function fmtDisp(dt) {
+    if (!dt) return '—';
+    return dt.replace('T', ' ').slice(0, 16);
+  }
+
+  function render() {
+    var el = document.getElementById('stageList');
+    var html = '';
+    STAGES.forEach(function (s, i) {
+      if (s.group) {
+        html += '<div class="group-label">三轮录取（展开为三轮，分别配置时间）</div>';
+      }
+      html += '<div class="stage-row" data-i="' + i + '">' +
+        '<div class="stage-name">' + s.name + '<small>' + s.sub + '</small></div>' +
+        '<div><input class="input start" data-i="' + i + '" type="datetime-local" value="' + s.start + '"></div>' +
+        '<div><input class="input end" data-i="' + i + '" type="datetime-local" value="' + s.end + '"></div>' +
+        '</div>';
+    });
+    el.innerHTML = html;
+
+    el.querySelectorAll('input.start').forEach(function (inp) { inp.addEventListener('input', function () { STAGES[+inp.dataset.i].start = inp.value; inp.classList.remove('err'); clearConflict(); }); });
+    el.querySelectorAll('input.end').forEach(function (inp) { inp.addEventListener('input', function () { STAGES[+inp.dataset.i].end = inp.value; inp.classList.remove('err'); clearConflict(); }); });
+  }
+
+  function clearConflict() {
+    document.querySelectorAll('.stage-row').forEach(function (r) { r.classList.remove('conflict'); });
+    document.querySelectorAll('.input').forEach(function (i) { i.classList.remove('err'); });
+  }
+
+  function genNotice() {
+    var lines = STAGES.map(function (s) { return s.name + '：' + fmtDisp(s.start) + ' ~ ' + fmtDisp(s.end); });
+    document.getElementById('noticeBody').value = '各阶段时间调整如下：\n\n' + lines.join('\n') + '\n\n请各位同学、导师关注各阶段起止时间，按时完成对应操作。';
+  }
+
+  document.getElementById('pubSwitch').addEventListener('click', function () {
+    var on = this.classList.toggle('on');
+    document.getElementById('noticeEditor').classList.toggle('show', on);
+    if (on) genNotice();
+  });
+
+  function validate() {
+    clearConflict();
+    for (var i = 0; i < STAGES.length; i++) {
+      var s = STAGES[i];
+      var row = document.querySelector('.stage-row[data-i="' + i + '"]');
+      if (!s.start || !s.end) {
+        row.classList.add('conflict');
+        row.querySelectorAll('input').forEach(function (x) { if (!x.value) x.classList.add('err'); });
+        return '请填写完整的阶段时间';
+      }
+      if (s.start >= s.end) {
+        row.classList.add('conflict');
+        row.querySelectorAll('input').forEach(function (x) { x.classList.add('err'); });
+        return '阶段结束时间必须晚于开始时间';
+      }
+      if (i > 0 && STAGES[i - 1].end > s.start) {
+        row.classList.add('conflict');
+        document.querySelector('.stage-row[data-i="' + (i - 1) + '"]').classList.add('conflict');
+        return '阶段时间必须按流程顺序设置且不能重叠';
+      }
+    }
+    var pub = document.getElementById('pubSwitch').classList.contains('on');
+    if (pub) {
+      var t = document.getElementById('noticeTitle').value.trim();
+      var b = document.getElementById('noticeBody').value.trim();
+      if (!t || !b) return '公告内容不能为空';
+    }
+    return null;
+  }
+
+  function showToast(msg, ok) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + (ok ? 'ok' : 'err');
+    setTimeout(function () { t.classList.remove('show'); }, 2800);
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', function () {
+    var err = validate();
+    if (err) { showToast(err, false); return; }
+    var pub = document.getElementById('pubSwitch').classList.contains('on');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '保存中…';
+    setTimeout(function () {
+      saveBtn.textContent = '保存';
+      saveBtn.disabled = false;
+      showToast(pub ? '保存成功，公告已发布' : '保存成功', true);
+    }, 700);
+  });
+
+  var saveBtn = document.getElementById('saveBtn');
+  render();
+})();
+</script>
+<script>(function(){var r='manager';var as=document.querySelectorAll('a[href]');for(var i=0;i<as.length;i++){var h=as[i].getAttribute('href');if(h&&h.slice(-5)==='.html'&&h.indexOf('?')<0){as[i].setAttribute('href',h+'?role='+r);}}})();</script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softwarego.selection.admission.mapper.AdmissionMapper">
+
+    <resultMap id="TeacherApplicationResultMap"
+               type="com.softwarego.selection.admission.dto.TeacherApplicationItem">
+        <id column="target_id" property="targetId"/>
+        <result column="application_id" property="applicationId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="staff_no" property="staffNo"/>
+        <result column="student_name" property="studentName"/>
+        <result column="preference_no" property="preferenceNo"/>
+        <result column="score" property="score"/>
+        <result column="tie_order" property="tieOrder"/>
+        <result column="scored_at" property="scoredAt"/>
+        <result column="resume_file_id" property="resumeFileId"/>
+        <result column="resume_file_name" property="resumeFileName"/>
+        <result column="offer_id" property="offerId"/>
+        <result column="offer_status" property="offerStatus"/>
+        <result column="confirm_deadline" property="confirmDeadline"/>
+        <result column="student_admitted" property="studentAdmitted"/>
+    </resultMap>
+
+    <resultMap id="AdmissionTargetResultMap"
+               type="com.softwarego.selection.admission.domain.AdmissionTarget">
+        <id column="id" property="id"/>
+        <result column="application_id" property="applicationId"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="round_no" property="roundNo"/>
+        <result column="score" property="score"/>
+        <result column="tie_order" property="tieOrder"/>
+        <result column="scored_at" property="scoredAt"/>
+    </resultMap>
+
+    <resultMap id="GrantCandidateResultMap"
+               type="com.softwarego.selection.admission.domain.GrantCandidate">
+        <id column="target_id" property="targetId"/>
+        <result column="application_id" property="applicationId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="staff_no" property="staffNo"/>
+        <result column="student_name" property="studentName"/>
+        <result column="score" property="score"/>
+        <result column="tie_order" property="tieOrder"/>
+    </resultMap>
+
+    <select id="findApplications" resultMap="TeacherApplicationResultMap">
+        SELECT t.id AS target_id,
+               t.application_id,
+               va.student_id,
+               su.staff_no,
+               su.name AS student_name,
+               t.preference_no,
+               t.score,
+               t.tie_order,
+               t.scored_at,
+               va.resume_file_id,
+               rf.original_name AS resume_file_name,
+               o.id AS offer_id,
+               o.status AS offer_status,
+               o.confirm_deadline,
+               CASE WHEN fa.id IS NULL THEN 0 ELSE 1 END AS student_admitted
+        FROM application_target t
+        JOIN volunteer_application va ON va.id = t.application_id
+        JOIN sys_user su ON su.id = va.student_id
+        LEFT JOIN resume_file rf ON rf.id = va.resume_file_id
+        LEFT JOIN offer o ON o.application_target_id = t.id
+        LEFT JOIN final_admission fa ON fa.student_id = va.student_id
+        WHERE t.teacher_id = #{teacherId}
+          AND va.round_no = #{roundNo}
+        ORDER BY CASE WHEN t.score IS NULL THEN 1 ELSE 0 END,
+                 t.score DESC,
+                 CASE WHEN t.tie_order IS NULL THEN 1 ELSE 0 END,
+                 t.tie_order ASC,
+                 t.id ASC
+    </select>
+
+    <select id="findTarget" resultMap="AdmissionTargetResultMap">
+        SELECT t.id,
+               t.application_id,
+               t.teacher_id,
+               va.student_id,
+               va.round_no,
+               t.score,
+               t.tie_order,
+               t.scored_at
+        FROM application_target t
+        JOIN volunteer_application va ON va.id = t.application_id
+        WHERE t.id = #{targetId}
+    </select>
+
+    <update id="updateScore">
+        UPDATE application_target
+        SET score = #{score},
+            scored_at = #{scoredAt},
+            tie_order = NULL
+        WHERE id = #{targetId}
+    </update>
+
+    <update id="updateTieOrder">
+        UPDATE application_target
+        SET tie_order = #{tieOrder},
+            updated_at = #{updatedAt}
+        WHERE id = #{targetId}
+    </update>
+
+    <select id="countTieOrderConflict" resultType="long">
+        SELECT COUNT(*)
+        FROM application_target t
+        JOIN volunteer_application va ON va.id = t.application_id
+        WHERE t.teacher_id = #{teacherId}
+          AND va.round_no = #{roundNo}
+          AND t.score = #{score}
+          AND t.tie_order = #{tieOrder}
+          AND t.id &lt;&gt; #{targetId}
+    </select>
+
+    <select id="countFinalAdmissions" resultType="long">
+        SELECT COUNT(*)
+        FROM final_admission
+        WHERE teacher_id = #{teacherId}
+    </select>
+
+    <select id="countPendingOffers" resultType="long">
+        SELECT COUNT(*)
+        FROM offer
+        WHERE teacher_id = #{teacherId}
+          AND status = 'PENDING'
+          AND confirm_deadline &gt; #{now}
+    </select>
+
+    <select id="countOfferByTargetId" resultType="long">
+        SELECT COUNT(*)
+        FROM offer
+        WHERE application_target_id = #{targetId}
+    </select>
+
+    <select id="findGrantCandidates" resultMap="GrantCandidateResultMap">
+        SELECT t.id AS target_id,
+               t.application_id,
+               va.student_id,
+               su.staff_no,
+               su.name AS student_name,
+               t.score,
+               t.tie_order
+        FROM application_target t
+        JOIN volunteer_application va ON va.id = t.application_id
+        JOIN sys_user su ON su.id = va.student_id
+        WHERE t.teacher_id = #{teacherId}
+          AND va.round_no = #{roundNo}
+          AND t.score IS NOT NULL
+          AND t.score &gt;= #{cutoffScore}
+          AND NOT EXISTS (
+              SELECT 1
+              FROM final_admission fa
+              WHERE fa.student_id = va.student_id
+          )
+          AND NOT EXISTS (
+              SELECT 1
+              FROM offer o
+              WHERE o.application_target_id = t.id
+          )
+        ORDER BY t.score DESC,
+                 CASE WHEN t.tie_order IS NULL THEN 1 ELSE 0 END,
+                 t.tie_order ASC,
+                 t.id ASC
+    </select>
+
+    <insert id="insertOffer" parameterType="com.softwarego.selection.offer.domain.Offer"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO offer (
+            teacher_id, student_id, application_target_id, round_no, status,
+            confirm_deadline, granted_at
+        ) VALUES (
+            #{teacherId}, #{studentId}, #{applicationTargetId}, #{roundNo}, #{status},
+            #{confirmDeadline}, #{grantedAt}
+        )
+    </insert>
+</mapper>

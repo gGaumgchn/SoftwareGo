@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softwarego.selection.announcement.mapper.AnnouncementMapper">
+
+    <resultMap id="AnnouncementResultMap" type="com.softwarego.selection.announcement.domain.Announcement">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="publisher_id" property="publisherId"/>
+        <result column="published_at" property="publishedAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.softwarego.selection.announcement.domain.Announcement"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO announcement (title, content, publisher_id, published_at)
+        VALUES (#{title}, #{content}, #{publisherId}, #{publishedAt})
+    </insert>
+
+    <select id="findPage" resultMap="AnnouncementResultMap">
+        SELECT id, title, content, publisher_id, published_at
+        FROM announcement
+        ORDER BY published_at DESC, id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM announcement
+    </select>
+
+    <select id="findById" resultMap="AnnouncementResultMap">
+        SELECT id, title, content, publisher_id, published_at
+        FROM announcement
+        WHERE id = #{id}
+    </select>
+</mapper>

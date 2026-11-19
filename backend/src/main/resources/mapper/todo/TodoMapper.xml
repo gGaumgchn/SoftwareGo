@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softwarego.selection.todo.mapper.TodoMapper">
+
+    <select id="countStudentApplication" resultType="long">
+        SELECT COUNT(*)
+        FROM volunteer_application
+        WHERE student_id = #{studentId}
+          AND round_no = #{roundNo}
+    </select>
+
+    <select id="countUnscoredTargets" resultType="long">
+        SELECT COUNT(*)
+        FROM application_target t
+        JOIN volunteer_application va ON va.id = t.application_id
+        WHERE t.teacher_id = #{teacherId}
+          AND va.round_no = #{roundNo}
+          AND t.score IS NULL
+    </select>
+
+    <select id="countGrantableTargets" resultType="long">
+        SELECT COUNT(*)
+        FROM application_target t
+        JOIN volunteer_application va ON va.id = t.application_id
+        WHERE t.teacher_id = #{teacherId}
+          AND va.round_no = #{roundNo}
+          AND t.score IS NOT NULL
+          AND NOT EXISTS (
+              SELECT 1
+              FROM offer o
+              WHERE o.application_target_id = t.id
+          )
+    </select>
+
+    <select id="countUnconfiguredStages" resultType="long">
+        SELECT COUNT(*)
+        FROM stage
+        WHERE start_at IS NULL
+           OR end_at IS NULL
+    </select>
+</mapper>

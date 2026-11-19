@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softwarego.selection.volunteer.mapper.ApplicationTargetMapper">
+
+    <resultMap id="VolunteerTargetResultMap"
+               type="com.softwarego.selection.volunteer.dto.VolunteerTargetResponse">
+        <result column="preference_no" property="preferenceNo"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="teacher_name" property="teacherName"/>
+        <result column="lab_name" property="labName"/>
+    </resultMap>
+
+    <select id="findTargetsByApplicationId" resultMap="VolunteerTargetResultMap">
+        SELECT t.preference_no,
+               t.teacher_id,
+               l.teacher_name,
+               l.lab_name
+        FROM application_target t
+        LEFT JOIN lab_info l ON l.teacher_id = t.teacher_id
+        WHERE t.application_id = #{applicationId}
+        ORDER BY t.preference_no ASC
+    </select>
+
+    <delete id="deleteByApplicationId">
+        DELETE FROM application_target
+        WHERE application_id = #{applicationId}
+    </delete>
+
+    <insert id="insert" parameterType="com.softwarego.selection.volunteer.domain.ApplicationTarget"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO application_target (application_id, teacher_id, preference_no)
+        VALUES (#{applicationId}, #{teacherId}, #{preferenceNo})
+    </insert>
+
+    <select id="countProcessedTargets" resultType="long">
+        SELECT COUNT(*)
+        FROM application_target t
+        WHERE t.application_id = #{applicationId}
+          AND (
+              t.score IS NOT NULL
+              OR EXISTS (
+                  SELECT 1
+                  FROM offer o
+                  WHERE o.application_target_id = t.id
+              )
+          )
+    </select>
+</mapper>

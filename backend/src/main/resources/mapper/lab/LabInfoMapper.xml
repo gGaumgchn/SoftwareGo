@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softwarego.selection.lab.mapper.LabInfoMapper">
+
+    <resultMap id="LabInfoResultMap" type="com.softwarego.selection.lab.domain.LabInfo">
+        <id column="id" property="id"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="teacher_name" property="teacherName"/>
+        <result column="lab_name" property="labName"/>
+        <result column="location" property="location"/>
+        <result column="planned_quota" property="plannedQuota"/>
+        <result column="research_direction" property="researchDirection"/>
+        <result column="contact" property="contact"/>
+        <result column="resume_file_id" property="resumeFileId"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <resultMap id="LabListItemMap" type="com.softwarego.selection.lab.dto.LabListItem">
+        <id column="id" property="id"/>
+        <result column="lab_name" property="labName"/>
+        <result column="location" property="location"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="teacher_name" property="teacherName"/>
+        <result column="research_direction" property="researchDirection"/>
+        <result column="planned_quota" property="plannedQuota"/>
+        <result column="lab_total_quota" property="labTotalQuota"/>
+        <result column="contact" property="contact"/>
+        <result column="resume_file_id" property="resumeFileId"/>
+    </resultMap>
+
+    <sql id="labInfoColumns">
+        id, teacher_id, teacher_name, lab_name, location, planned_quota,
+        research_direction, contact, resume_file_id, created_at, updated_at
+    </sql>
+
+    <sql id="labFilters">
+        <where>
+            <if test="keyword != null">
+                AND (
+                    l.lab_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR l.teacher_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR l.research_direction LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="researchDirection != null">
+                AND l.research_direction = #{researchDirection}
+            </if>
+        </where>
+    </sql>
+
+    <select id="findById" resultMap="LabInfoResultMap">
+        SELECT <include refid="labInfoColumns"/>
+        FROM lab_info
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByTeacherId" resultMap="LabInfoResultMap">
+        SELECT <include refid="labInfoColumns"/>
+        FROM lab_info
+        WHERE teacher_id = #{teacherId}
+    </select>
+
+    <select id="findByTeacherIdForUpdate" resultMap="LabInfoResultMap">
+        SELECT <include refid="labInfoColumns"/>
+        FROM lab_info
+        WHERE teacher_id = #{teacherId}
+        FOR UPDATE
+    </select>
+
+    <insert id="insert" parameterType="com.softwarego.selection.lab.domain.LabInfo"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO lab_info (
+            teacher_id, teacher_name, lab_name, location, planned_quota,
+            research_direction, contact, resume_file_id
+        ) VALUES (
+            #{teacherId}, #{teacherName}, #{labName}, #{location}, #{plannedQuota},
+            #{researchDirection}, #{contact}, #{resumeFileId}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.softwarego.selection.lab.domain.LabInfo">
+        UPDATE lab_info
+        SET teacher_name = #{teacherName},
+            lab_name = #{labName},
+            location = #{location},
+            planned_quota = #{plannedQuota},
+            research_direction = #{researchDirection},
+            contact = #{contact},
+            resume_file_id = #{resumeFileId}
+        WHERE teacher_id = #{teacherId}
+    </update>
+
+    <select id="findPage" resultMap="LabListItemMap">
+        SELECT
+            l.id,
+            l.lab_name,
+            l.location,
+            l.teacher_id,
+            l.teacher_name,
+            l.research_direction,
+            l.planned_quota,
+            l.contact,
+            l.resume_file_id,
+            (
+                SELECT SUM(l2.planned_quota)
+                FROM lab_info l2
+                WHERE l2.lab_name = l.lab_name
+                  AND l2.location = l.location
+            ) AS lab_total_quota
+        FROM lab_info l
+        <include refid="labFilters"/>
+        ORDER BY l.lab_name ASC, l.teacher_name ASC, l.id ASC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM lab_info l
+        <include refid="labFilters"/>
+    </select>
+
+    <select id="findResearchDirections" resultType="string">
+        SELECT DISTINCT research_direction
+        FROM lab_info
+        ORDER BY research_direction ASC
+    </select>
+
+    <select id="sumQuotaByLabNameAndLocation" resultType="long">
+        SELECT COALESCE(SUM(planned_quota), 0)
+        FROM lab_info
+        WHERE lab_name = #{labName}
+          AND location = #{location}
+    </select>
+
+    <select id="findByTeacherName" resultMap="LabInfoResultMap">
+        SELECT <include refid="labInfoColumns"/>
+        FROM lab_info
+        WHERE teacher_name = #{teacherName}
+    </select>
+
+    <select id="findAvailableTeachers" resultType="com.softwarego.selection.lab.dto.AvailableTeacherItem">
+        SELECT t.teacher_id,
+               t.teacher_name,
+               t.lab_name,
+               t.location,
+               t.research_direction,
+               t.planned_quota,
+               t.remaining_quota
+        FROM (
+            SELECT l.teacher_id,
+                   l.teacher_name,
+                   l.lab_name,
+                   l.location,
+                   l.research_direction,
+                   l.planned_quota,
+                   CAST(l.planned_quota AS SIGNED)
+                   - (SELECT COUNT(*) FROM final_admission fa WHERE fa.teacher_id = l.teacher_id)
+                   - (SELECT COUNT(*)
+                      FROM offer o
+                      WHERE o.teacher_id = l.teacher_id
+                        AND o.status = 'PENDING'
+                        AND o.confirm_deadline &gt; #{now}) AS remaining_quota
+            FROM lab_info l
+        ) t
+        WHERE t.remaining_quota &gt; 0
+        ORDER BY t.teacher_name ASC, t.teacher_id ASC
+    </select>
+</mapper>
